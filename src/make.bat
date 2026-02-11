@@ -1,0 +1,2 @@
+cd W:\PS3111_NEW_WROKSPACE\CPU_PS3111\bin\PS3111_MemoryMap\Hynix3DV6FW
+make

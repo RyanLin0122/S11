@@ -1,0 +1,1 @@
+astyle --style=kr --mode=c --indent=tab --brackets=attach --break-closing-brackets  --indent-switches  --indent-labels --indent-col1-comments --pad-oper --pad-header --suffix=none ddr.c Flash.c main.c RW.c Satacmd.c vender.c ftltool.c ftl.c ftlinit.c flainit.c ftlcommon.c flafail.c Ph_SQL.c RDT.c smart.c sanitize.c Security.c HPA.c DCO.c Vardef.h Vender.c
