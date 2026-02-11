@@ -118,8 +118,8 @@ flowchart TD
     E -->|No| X[設定錯誤或走清理路徑\nDiscard_Redundant_NCQRCMD]
     E -->|Yes| F{NCQ 模式?}
 
-    F -->|Yes| G[讀取 tag/LBA/SectorCnt/EC\n填 WR_NCQ_CMD_INFO[tag]]
-    F -->|No| H[CheckID + 解析 gulLBA/gulSectorCnt\n計算 EC，填 WR_NCQ_CMD_INFO[0]]
+    F -->|Yes| G[讀取 tag/LBA/SectorCnt/EC\n填 WR_NCQ_CMD_INFO(tag)]
+    F -->|No| H[CheckID + 解析 gulLBA/gulSectorCnt\n計算 EC，填 WR_NCQ_CMD_INFO(0)]
 
     G --> I[主讀迴圈]
     H --> I
