@@ -109,35 +109,35 @@
 
 ```mermaid
 flowchart TD
-    A[Host 發出 Read Command] --> B[SataCmdTable 分派]
-    B -->|0x20/0x24/0x25/0xC8| C[ReadSectors]
-    B -->|0x29/0xC4| D[ReadMultiple]
+    A["Host 發出 Read Command"] --> B["SataCmdTable 分派"]
+    B -->|0x20／0x24／0x25／0xC8| C["ReadSectors"]
+    B -->|0x29／0xC4| D["ReadMultiple"]
     D --> C
 
-    C --> E{前置檢查通過?\nsecurity/LBA48/sanitize/reset狀態}
-    E -->|No| X[設定錯誤或走清理路徑\nDiscard_Redundant_NCQRCMD]
-    E -->|Yes| F{NCQ 模式?}
+    C --> E{"前置檢查通過？<br/>security／LBA48／sanitize／reset 狀態"}
+    E -->|No| X["設定錯誤或走清理路徑<br/>Discard_Redundant_NCQRCMD"]
+    E -->|Yes| F{"NCQ 模式？"}
 
-    F -->|Yes| G[讀取 tag/LBA/SectorCnt/EC\n填 WR_NCQ_CMD_INFO(tag)]
-    F -->|No| H[CheckID + 解析 gulLBA/gulSectorCnt\n計算 EC，填 WR_NCQ_CMD_INFO(0)]
+    F -->|Yes| G["讀取 tag／LBA／SectorCnt／EC<br/>填 WR_NCQ_CMD_INFO（tag）"]
+    F -->|No| H["CheckID 與解析 gulLBA／gulSectorCnt<br/>計算 EC，填 WR_NCQ_CMD_INFO（0）"]
 
-    G --> I[主讀迴圈]
+    G --> I["主讀迴圈"]
     H --> I
 
-    I --> J[送 TQ: 寫 HL_TQ_CONTENT\n gulNCQRDCmdTriggerCnt++]
-    J --> K[依 Vir4K 分段判斷資料來源\nSDR/WB 命中? 部分命中?]
-    K --> L[建 BQ 並 M_AddToBufferQueue]
-    K --> M{可走全零捷徑?}
-    M -->|Yes| N[H_SEND_ZERO_DATA]
+    I --> J["送 TQ：寫 HL_TQ_CONTENT<br/>gulNCQRDCmdTriggerCnt 加一"]
+    J --> K["依 Vir4K 分段判斷資料來源<br/>SDR／WB 命中？部分命中？"]
+    K --> L["建 BQ 並 M_AddToBufferQueue"]
+    K --> M{"可走全零捷徑？"}
+    M -->|Yes| N["H_SEND_ZERO_DATA"]
     M -->|No| L
 
-    L --> O[DoneEC_Check() 輪詢完成]
+    L --> O["DoneEC_Check() 輪詢完成"]
     N --> O
 
-    O --> P{仍有 in-flight EC?}
+    O --> P{"仍有 in-flight EC？"}
     P -->|Yes| O
-    P -->|No| Q[更新 read buffer pointer\n清 preread/狀態]
-    Q --> R[Read Flow End]
+    P -->|No| Q["更新 read buffer pointer<br/>清 preread／狀態"]
+    Q --> R["Read Flow End"]
 
     X --> R
 ```
