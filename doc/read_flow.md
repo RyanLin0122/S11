@@ -118,13 +118,13 @@ flowchart TD
     E -->|No| X[設定錯誤或走清理路徑\nDiscard_Redundant_NCQRCMD]
     E -->|Yes| F{NCQ 模式?}
 
-    F -->|Yes| G[讀取 tag 與 LBA/SectorCnt/EC\n寫入 WR_NCQ_CMD_INFO]
-    F -->|No| H[CheckID + 解析 gulLBA/gulSectorCnt\n計算 EC 並寫入 WR_NCQ_CMD_INFO]
+    F -->|Yes| G[讀取 tag/LBA/SectorCnt/EC\n填 WR_NCQ_CMD_INFO[tag]]
+    F -->|No| H[CheckID + 解析 gulLBA/gulSectorCnt\n計算 EC，填 WR_NCQ_CMD_INFO[0]]
 
     G --> I[主讀迴圈]
     H --> I
 
-    I --> J[送 TQ: 寫 HL_TQ_CONTENT\n增加 gulNCQRDCmdTriggerCnt]
+    I --> J[送 TQ: 寫 HL_TQ_CONTENT\n gulNCQRDCmdTriggerCnt++]
     J --> K[依 Vir4K 分段判斷資料來源\nSDR/WB 命中? 部分命中?]
     K --> L[建 BQ 並 M_AddToBufferQueue]
     K --> M{可走全零捷徑?}
