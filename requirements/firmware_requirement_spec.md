@@ -288,8 +288,11 @@
 - POL-001（Observed）: RTT1 init limit 設為 `1000`（1ms tick）。  
 - POL-002（Observed）: `AUTOPOL_TIMEOUT_MILLISEC = 10000`。  
 - POL-003（Observed）: `PFAIL` 測試路徑存在 `>=250` 計時條件（RDT）。  
-- POL-004（Observed）: init state 枚舉固定為 `BYTE_INIT_START_SCAN..BYTE_INIT_PRELOAD_L2P`。
-
+- POL-004（Observed）: init state 枚舉固定為 `BYTE_INIT_START_SCAN..BYTE_INIT_PRELOAD_L2P`。  
+- POL-005（Observed）: `NCQ_TIMEOUT_THRESHOLD = 8000 ms`。  
+- POL-006（Observed）: `ATA_TIMEOUT_THRESHOLD = 8000 ms`。  
+- POL-007（Observed）: `TEMPERATURE_NACK_TIMEOUT = 2000 ms`。  
+- POL-008（Observed）: sanitize 進度回報使用 `HL_LBA_L = 65536 * (processed / total)`（僅 SD2 狀態）。
 ### 11.2 Runtime policy constraints
 - POL-010（Observed）: host command 到達時 BG copy 必須可中斷。  
 - POL-011（Observed）: sanitize/security lock 狀態下，多數資料命令需 ABRT。  
@@ -299,7 +302,7 @@
 - POL-U-001: GC free-block watermark / hysteresis 數值。
 - POL-U-002: WL 觸發與 budget。
 - POL-U-003: 各 NAND read-retry 次數/曲線最終量產表。
-- POL-U-004: sanitize progress update cadence/timeout acceptance。
+- POL-U-004: sanitize operation **總超時上限**（整個 overwrite cycle）未找到固定常數；僅觀察到離線迴圈按 plane/4K 批次推進。
 - POL-U-005: power-fail hold-up 物理時間與最小保護寫入窗口。
 
 ---
@@ -320,6 +323,19 @@
 - CFG-002（Observed）: NAND vendor/tech 影響 FPU sequence/retry table/plane policy。  
 - CFG-003（Observed）: SKU 若未 freeze macro set，行為差異可非常大。  
 - CFG-004（Unknown）: 量產 SKU 對照表缺失，需補 build manifest。
+
+---
+
+
+### 13.1 Vendor command exposure profile（由 code 反推）
+- CFG-VND-001（Observed）: vendor command 主入口為 `AP_Entry()`，僅在 `gubAP_enable` 時進入，並以 `HB_FEATURE` 分派子命令。  
+- CFG-VND-002（Observed）: vendor lock 機制存在：`gubVenderLock` 開啟時，多數命令需先通過 unlock 流程（連續 3 次正確 unlock payload）或特定 `SET FEATURES` 白名單事件。  
+- CFG-VND-003（Observed）: 多個 vendor case 受 compile-time guard 控制（`#if(!RDT)`, `#if BURNER`, `#if PH_SQL_FUNC`, `#if EnableProductHistory`），可據此區分 shipping/factory/debug 命令群。
+
+### 13.2 Firmware update safety behavior（由 DLMC/ISP 流程反推）
+- CFG-UPD-001（Observed）: DLMC/ISP 流程包含 header magic/version 檢查與 infoblock checksum 欄位驗證，錯誤會進入 `DLMC_ErrorDetect()` 對應碼並中止流程。  
+- CFG-UPD-002（Observed）: 更新流程包含「header 讀取 -> section 資訊載入 -> 程式/驗證 -> system info 更新」多階段檢查點，且失敗碼細分（10~36等）。  
+- CFG-UPD-003（Inferred）: 未觀察到通用 dual-image rollback 機制；目前可確認的是嚴格前置檢查 + 失敗中止 + 特定路徑 ISP jump。
 
 ---
 

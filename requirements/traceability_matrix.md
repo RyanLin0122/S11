@@ -35,3 +35,11 @@
 | PM-001 | persistent ATA config and metadata requirement | `src/sanitize.c`/`src/smart.c`/`src/DCO.c` (`SaveAtaConfig`) + table structures in `src/FTL.h` | Inferred | Medium | on-media exact layout unknown |
 | TV-010 | reset during I/O validation required by observed stop/reinit logic | `src/main.c` reset handling blocks | Inferred | Medium | derived verification rule |
 | DSC-003 | many ATA opcodes remain not implemented | `src/cmdtbl.h` (`NotImplement`) | Observed | High | compatibility scope |
+| POL-005 | NCQ timeout threshold is 8000 ms | `src/Vardef.h` (`NCQ_TIMEOUT_THRESHOLD`) | Observed | High | concrete timeout constant |
+| POL-006 | ATA timeout threshold is 8000 ms | `src/Vardef.h` (`ATA_TIMEOUT_THRESHOLD`) | Observed | High | concrete timeout constant |
+| POL-007 | Temperature NACK timeout is 2000 ms | `src/Setup.h` (`TEMPERATURE_NACK_TIMEOUT`) | Observed | High | thermal policy parameter |
+| POL-008 | Sanitize progress uses HL_LBA_L scaled percentage formula | `src/sanitize.c` (`Sanitize_NormalOutput`) | Observed | High | progress reporting contract |
+| CFG-VND-001 | Vendor command entry uses AP mode + HB_FEATURE switch | `src/vender.c` (`AP_Entry`) | Observed | High | exposure surface |
+| CFG-VND-002 | Vendor lock/unlock policy with 3-pass unlock payload | `src/vender.c` (`CheckVenderLock`, `Vender_UnlockCmd`) | Observed | High | command gating behavior |
+| CFG-UPD-001 | DLMC validates header magic/version and infoblock checksums | `src/Satacmd.c` DLMC flow (`Mark_Check_DLMC_Protocol` area) | Observed | Medium | update compatibility checks |
+| CFG-UPD-002 | DLMC update uses staged checks with explicit error codes | `src/Satacmd.c` (`DLMC_ErrorDetect` calls 10~36 etc.) | Observed | Medium | fail-fast update behavior |
