@@ -1,41 +1,54 @@
-# Open Questions / Ambiguities
+# Open Questions / Ambiguities (Post-Revision)
 
-## OQ-001: FTL On-media Metadata Layout
-- 問題：L2P/P2L/GR/GC 相關 table 的 on-media layout/versioning/CRC policy 未在單一文件明確定義。
-- 影響：重建 firmware 時，無法僅憑現有資料保證與原 FW 完全相容的媒體格式。
-- 建議：補充 metadata schema 文件（header、entry format、superblock/recovery marker）。
+## OQ-001: On-media metadata binary format (critical)
+- 已補「最低持久化契約」(PM-001~PM-005)，但仍缺原廠精確格式：
+  - superblock/header binary layout
+  - version migration rule
+  - checksum/CRC polynomial
+  - checkpoint/journal record encoding
+  - clean/dirty close marker 實際位元位置
+- 影響：可重建功能行為，但無法保證 media binary compatibility。
 
-## OQ-002: SKU Macro Freeze List
-- 問題：`Setup.h` 宏非常多，但缺少產品 SKU 與 macro 組合對照表。
-- 影響：新團隊無法確定量產配置（哪些功能為 debug-only、factory-only）。
-- 建議：輸出每 SKU 的 build manifest（macro set + NAND ID list + capacity bins）。
+## OQ-002: GC/WL quantitative thresholds
+- 已補觸發流程與 suspend/resume 規則，但仍缺數值：
+  - free block watermark/hysteresis
+  - WL trigger/budget
+  - critical GC threshold
+- 影響：效能/耐久曲線可能偏離原 FW。
 
-## OQ-003: GC/WL Quantitative Policy
-- 問題：可觀察到 GC/WL 觸發旗標，但門檻值、分級策略、不同負載下切換條件不完整。
-- 影響：可重現功能但不易重現相同性能/耐久行為。
-- 建議：補齊 policy 表（free block watermark, WL trigger, hysteresis）。
+## OQ-003: Timeout budget matrix
+- 已補 timeout handling 原則與已觀察常數（RTT 1ms、autopol 10s、PFAIL test 250 tick），仍缺：
+  - HB_REG_REQ polling timeout
+  - queue drain timeout
+  - reset retry budget
+  - sanitize operation timeout policy
 
-## OQ-004: Power-loss Guarantee Envelope
-- 問題：有 PFAIL state machine 但缺少外部硬體 hold-up 條件與驗證規範（最短保護時間、電壓曲線）。
-- 影響：無法定義資料完整性保證邊界。
-- 建議：補硬體/韌體聯合規格（capacitor sizing, GPIO trigger timing, shutdown budget）。
+## OQ-004: SKU macro freeze manifest
+- `Setup.h` 宏極多，仍缺產品 SKU 對照：
+  - 哪些宏為 shipping
+  - 哪些為 factory/RMA/debug
+  - NAND ID -> macro profile 映射
 
-## OQ-005: Vendor Command Productization Scope
-- 問題：`vender.c` 含大量診斷/工廠/維修命令，難以區分量產對外暴露與內部限定。
-- 影響：重建版本可能誤暴露危險命令或缺失必要維修能力。
-- 建議：建立命令白名單（shipping / manufacturing / RMA / disabled）。
+## OQ-005: Vendor command exposure policy
+- 仍需確認 `vender.c` 子命令白名單：
+  - shipping enabled
+  - manufacturing only
+  - disabled in production
 
-## OQ-006: hw_spec vs FW Used Subset
-- 問題：硬體規格提供完整 register capability，但 FW 實際只用子集合。
-- 影響：重建時若啟用不必要功能可能導致不可預期 side effects。
-- 建議：建立「used-register profile」與 reset default 比對。
+## OQ-006: Hardware used-register profile
+- 已補 driver sequence，但仍需確認「實際啟用 register subset」：
+  - APU/Doorbell/DMAC/FLH/DDR 使用清單
+  - reset default 假設
+  - 各 register side-effect 風險
 
-## OQ-007: Performance Targets
-- 問題：source 可看到 timeout 與一些 flow control，但缺乏明確 KPI（IOPS、latency、QoS、WAF）。
-- 影響：無法驗收新實作是否達成原產品性能。
-- 建議：由 PM/系統驗證提供正式 performance requirement baseline。
+## OQ-007: Performance acceptance criteria
+- 驗證章節已補 test matrix 類別，但仍缺正式 KPI：
+  - IOPS/latency/QoS
+  - SMART 指標驗收上下限
+  - WAF/endurance acceptance
 
-## OQ-008: Firmware Update Safety Protocol
-- 問題：存在 `Vender_Isp_*` 路徑，但版本相容、rollback、電源中斷恢復策略未完整敘明。
-- 影響：更新失敗風險與 recovery 流程不可驗證。
-- 建議：補齊 FOTA/ISP state machine 與 fail-safe 規格。
+## OQ-008: Firmware update fail-safe protocol
+- 已確認存在 ISP path，但仍缺正式更新契約：
+  - image compatibility check
+  - rollback/dual-image policy
+  - update interrupted by reset/pfail 的可恢復規則
